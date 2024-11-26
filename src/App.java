@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 public class App {
@@ -56,6 +57,13 @@ public class App {
 
                 case 3:
 
+                    if (planetaDestinoUsuario.isEmpty()) {
+                        System.out.println("Debes elegir un planeta como destino!!");
+                    } else if (naveEspacialUsuario.isEmpty()) {
+                        System.out.println("Debes elegir una nave espacial para llegar a " + planetaDestinoUsuario + "!!");
+                    } else {
+                        iniciarSimulacionViajeEspacial(scanner, planetaDestinoUsuario, naveEspacialUsuario, planetasDestino, navesEspaciales);
+                    }
                     break;
 
                 case 4:
@@ -138,6 +146,128 @@ public class App {
         System.out.println("Combustible disponible: " + infoNave[2]);
         System.out.println("Oxigeno disponible: " + infoNave[3]);
         return nave;
+    }
+// Método para modificar el combustible y oxígeno de la nave
+    public static void modificarRecursosNave(Scanner scanner, Map<String, String[]> navesEspaciales, String naveSeleccionada) {
+        String[] datosNave = navesEspaciales.get(naveSeleccionada);
+        System.out.println("\n ----- MODIFICANDO RECURSOS DE LA NAVE: " + naveSeleccionada + " -----");
+
+        // Modificar combustible
+        System.out.println("Combustible actual: " + datosNave[2] + " galones");
+        System.out.print("Ingrese el nuevo valor de combustible (en galones): ");
+        int nuevoCombustible = scanner.nextInt();
+        datosNave[2]         = String.valueOf(nuevoCombustible); // Convertimos el valor que digito el usuario a String
+
+        // Modificar oxígeno
+        System.out.println("\nOxígeno actual: " + datosNave[3] + " litros");
+        System.out.print("Ingrese el nuevo valor de oxígeno (en litros): ");
+        int nuevoOxigeno = scanner.nextInt();
+        datosNave[3]     = String.valueOf(nuevoOxigeno);  // Convertimos el valor que digito el usuario a String
+
+        // Guardamos los cambios en el mapa
+        navesEspaciales.put(naveSeleccionada, datosNave);
+        System.out.println("\nRecursos modificados exitosamente.");
+    }
+
+    public static void iniciarSimulacionViajeEspacial(Scanner scanner, String planetaDestino, String naveEspacial, Map<String, String[]> planetasDestino, Map<String, String[]> navesEspaciales) {
+
+        // Obtenemos los datos del planeta seleccionado por el usuario
+        String[] datosPlaneta     = planetasDestino.get(planetaDestino);
+        double distancia          = Double.parseDouble(datosPlaneta[1]);  // Distancia desde la tierra en millones de km al planeta
+        String descripcionPlaneta = datosPlaneta[0]; // Descripción del planeta
+    
+        // Obtenemos los datos de la nave seleccionada
+        String[] datosNave        = navesEspaciales.get(naveEspacial);
+        int velocidad             = Integer.parseInt(datosNave[0]);  // Velocidad máxima de la nave en km/h
+        int pasajeros             = Integer.parseInt(datosNave[1]);  // Capacidad de pasajeros de la nave
+        int combustibleDisponible = Integer.parseInt(datosNave[2]);  // Combustible disponible en litros
+        int oxigenoDisponible     = Integer.parseInt(datosNave[3]);  // Oxígeno disponible en litros
+    
+        System.out.println("\n------- INICIANDO SIMULACIÓN -------");
+        System.out.println("Planeta destino: " + planetaDestino);
+        System.out.println("Descripción: " + descripcionPlaneta);
+        System.out.println("Nave espacial seleccionada: " + naveEspacial);
+        System.out.println("Velocidad de la nave: " + velocidad + " km/h");
+        System.out.println("Capacidad de pasajeros: " + pasajeros);
+        System.out.println("Distancia a recorrer: " + distancia + " millones de km\n");
+        System.out.println("Combustible disponible: " + combustibleDisponible + " galones");
+        System.out.println("Oxígeno disponible: " + oxigenoDisponible + " litros");
+
+    
+        // Calculamos el tiempo estimado en horas para llegar al destino(planeta seleccionado)
+        double tiempoEstimadoHoras = distancia * 1000000 / velocidad; // Convertimos la distancia a km y dividimos por la velocidad
+        double tiempoEstimadoDias = tiempoEstimadoHoras / 24; // Convertimos la distancia a km y dividimos por la velocidad
+
+        int consumoCombustible = (int)(distancia * 10);  // 10 litros de combustible por millón de km
+        int consumoOxigeno     = (int)(distancia * 5);  // 5 litros de oxígeno por millón de km
+
+        // Verificamos si hay suficiente combustible y oxígeno
+        if (combustibleDisponible < consumoCombustible || oxigenoDisponible < consumoOxigeno) {
+            System.out.println("\nNo tienes suficientes recursos para completar el viaje. Combustible disponible: " + combustibleDisponible + ", Oxigeno Disponible " + oxigenoDisponible + " de la nave espacial" + naveEspacial);
+
+            scanner.nextLine();
+            System.out.println("Desea cambiar la cantidad de Combustible y Oxigeno? (S/N).");
+            char opcionUsuario = Character.toLowerCase(scanner.nextLine().charAt(0));
+
+            while (opcionUsuario != 's' && opcionUsuario != 'n') {
+                System.out.println("\nOpción no válida. Desea cambiar la cantidad de Combustible y Oxigeno? (S/N).");
+                opcionUsuario = Character.toLowerCase(scanner.nextLine().charAt(0));
+            }
+
+            if (Character.toLowerCase(opcionUsuario) == 's') {
+                modificarRecursosNave(scanner, navesEspaciales, naveEspacial);
+            } else {
+                System.out.println("\nNo puedes continuar con el viaje.");
+            }
+            return;
+            
+        }
+
+        // Simulamos la disminución de recursos durante el viaje
+        combustibleDisponible -= consumoCombustible;
+        oxigenoDisponible     -= consumoOxigeno;
+
+        // Mostramos el tiempo total estimado para llegar al planeta
+        System.out.println("\nEl tiempo estimado de viaje es de " + tiempoEstimadoDias + " dias.");
+        System.out.println("Recursos restantes: Combustible - " + combustibleDisponible + " galones, Oxígeno - " + oxigenoDisponible + " litros.\n");
+    
+        // Simulamos el viaje con eventos aleatorios
+        Random rand = new Random();
+        for (int porcentaje = 0; porcentaje <= 100; porcentaje += 10) {
+            // Progreso del viaje
+            if (porcentaje == 0) {
+                System.out.println("Inicio del viaje...");
+            } else if (porcentaje == 50) {
+                System.out.println("Mitad del camino...");
+            } else if (porcentaje == 100) {
+                System.out.println("Llegada al destino: ¡Has llegado a " + planetaDestino + "!");
+            } else {
+                System.out.println("Progreso del viaje: " + porcentaje + "%");
+            }
+
+            // Evento aleatorio: fallo o mejora
+            if (rand.nextInt(100) < 5) {  // 5% de probabilidad de fallo
+                System.out.println("¡Advertencia! Fallo en el sistema. Se ha perdido 10 galones porque ha recibido un golpe en el tanque de reserva.");
+                combustibleDisponible -= 10;
+            } else if (rand.nextInt(100) < 10) {  // 10% de probabilidad de mejora
+                System.out.println("¡Mejora en la eficiencia! Has ganado 5 galones de oxígeno.");
+                oxigenoDisponible += 5;
+            }
+
+            // Verificación de recursos
+            if (combustibleDisponible <= 0 || oxigenoDisponible <= 0) {
+                System.out.println("\nNo tienes suficientes recursos para continuar el viaje.");
+                break;
+            }
+
+            // Hacemos una pusa entre cada actualización para simular el paso del tiempo
+            try {
+                Thread.sleep(1000);   // Pausa de 1 segundo (1000 ms) para simular el avance
+            } catch (InterruptedException e) {
+                System.out.println("\nError en la simulación del viaje.");
+            }
+        }
+
     }
 
 }
