@@ -67,8 +67,9 @@ public class App {
                     break;
 
                 case 4:
-
-                   break;
+                    System.out.println("\nSaliendo del programa");
+                    mostrarMenuPrincipal = false;
+                    break;
 
                 default:
                     System.out.println("\nOpción Inválida");
@@ -147,7 +148,8 @@ public class App {
         System.out.println("Oxigeno disponible: " + infoNave[3]);
         return nave;
     }
-// Método para modificar el combustible y oxígeno de la nave
+    
+    // Método para modificar el combustible y oxígeno de la nave
     public static void modificarRecursosNave(Scanner scanner, Map<String, String[]> navesEspaciales, String naveSeleccionada) {
         String[] datosNave = navesEspaciales.get(naveSeleccionada);
         System.out.println("\n ----- MODIFICANDO RECURSOS DE LA NAVE: " + naveSeleccionada + " -----");
